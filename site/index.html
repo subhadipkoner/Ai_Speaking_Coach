@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Speaking Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05060f;--card:rgba(255,255,255,.045);--in:rgba(255,255,255,.06);--ink:#f1f3f9;--mut:#8b92a6;--line:rgba(255,255,255,.13);--ac:#1f6bff;--ok:#2fd27a;--bad:#ff5d6c;--warn:#f0a43a;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Poppins,system-ui,Segoe UI,sans-serif;min-height:100vh}
+/* backgrounds */
+#bgApp,#bgAuth{position:fixed;inset:0;z-index:-1;overflow:hidden}
+#bgApp{background:radial-gradient(40% 35% at 15% 30%,#7a1d6b99,transparent 70%),radial-gradient(45% 40% at 85% 20%,#1b3cff88,transparent 70%),radial-gradient(60% 40% at 50% 100%,#1e63ff99,transparent 70%),radial-gradient(35% 30% at 10% 75%,#38b6ff66,transparent 70%),#050719;filter:blur(18px) saturate(1.2)}
+#bgAuth{display:none}#bgAuth svg{width:100%;height:100%;display:block}
+body.auth #bgApp{display:none}body.auth #bgAuth{display:block}body.auth header{display:none}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 20px;position:sticky;top:0;z-index:5;background:rgba(5,6,15,.55);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;letter-spacing:.2px}.logo svg{width:22px;height:22px}
+h2{font-size:17px;margin:0 0 8px;font-weight:600}
+.stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.pill{background:var(--in);border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:13px}
+main{max-width:720px;margin:0 auto;padding:18px 14px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;backdrop-filter:blur(10px)}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--in);color:var(--ink);border-radius:12px;padding:7px 14px}
+button:hover:not(:disabled){border-color:#ffffff55}button.p{background:var(--ac);color:#fff;border-color:var(--ac)}button:disabled{opacity:.45;cursor:default}
+.panel{max-width:520px;margin:0 auto 16px;background:#000;border:1px solid rgba(255,255,255,.16);border-radius:30px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.phTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dots{border:0;background:none;color:#8a8f9c;font-size:20px;letter-spacing:2px;padding:0 4px;line-height:1}
+.hero{display:flex;flex-direction:column;min-height:min(84vh,700px)}.hero .phTop{justify-content:center;position:relative}.hero .dots{position:absolute;right:0}
+.orb{width:100px;height:100px;border-radius:50%;margin:34px 0 0 6px;display:grid;place-items:center;background:radial-gradient(circle at 50% 50%,#3b5bff 0,#1d2fb0 45%,#2a1d6e 75%,#14102e 100%);box-shadow:0 0 0 2px #ffffff22 inset,0 0 70px #2f5bff88}
+.orb svg{width:44px;height:44px;filter:drop-shadow(0 0 8px #fff)}
+.headline{font-size:36px;line-height:1.2;font-weight:500;margin:34px 6px 0;color:#fff;letter-spacing:-.5px}.headline .g{color:#6d7280}
+.deck{position:relative;height:120px;overflow:hidden;margin-top:auto;padding-top:8px}
+.dk{position:absolute;top:18px;width:112px;height:150px;border-radius:12px;padding:10px;font-size:12px;line-height:1.25;border:1px solid #ffffff22;box-shadow:0 10px 30px #0008}
+.dk small{display:block;font-size:9px;color:#ffffffaa;margin-bottom:4px}.dk b{font-size:14px;font-weight:600}
+.dk1{left:6px;transform:rotate(-6deg);background:linear-gradient(160deg,#2a56e8,#0a2275);z-index:3}
+.dk2{left:92px;top:26px;transform:rotate(2deg);background:linear-gradient(160deg,#1a2d6e,#0b1230);z-index:2}
+.dk3{left:178px;top:20px;transform:rotate(7deg);background:linear-gradient(160deg,#1b2342,#0a0d1c);z-index:1}
+.chips{display:flex;gap:10px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;position:relative;z-index:4}.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;min-width:218px;text-align:left;background:#111319ee;border:1px solid #ffffff1a;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.3}
+.chip small{display:block;color:var(--mut);font-size:11px;margin-top:3px}
+.barW{display:flex;gap:12px;align-items:center}
+.bar2{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:#0c0d12;border:1px solid #ffffff1f;border-radius:18px;padding:6px 12px;cursor:text}
+.bar2 .plus{background:none;border:0;padding:0 2px;font-size:26px;line-height:1;color:#fff;font-weight:300}
+.bar2 .ph{flex:1;color:#6f7482;font-size:14px;padding:12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar2 textarea{flex:1;min-width:0;background:none;border:0;outline:0;padding:9px 0;resize:none;min-height:38px;max-height:120px;font:inherit;color:#fff;font-size:14px}
+.mic{width:34px;height:34px;border-radius:50%;padding:0;border:0;background:none;color:#8a8f9c;display:grid;place-items:center;flex:none}.mic svg{width:18px;height:18px}
+.mic.on{background:var(--bad);color:#fff;animation:pu 1s infinite}@keyframes pu{50%{box-shadow:0 0 0 10px #ff5d6c33}}
+.go{width:54px;height:54px;border-radius:50%;background:#0a55e0;border:0;padding:0;display:grid;place-items:center;flex:none;box-shadow:0 6px 24px #0a55e066}.go svg{width:22px;height:22px}
+.sessP{display:flex;flex-direction:column;min-height:min(86vh,720px)}
+.ic{border:0;background:none;color:#fff;font-size:20px;padding:4px 8px}.ttl{flex:1;text-align:center;line-height:1.25}.ttl b{display:block;font-weight:600}.ttl span{font-size:12px;color:var(--mut)}
+.endBtn{background:#0a55e0;border:0;font-size:13px;padding:7px 12px;color:#fff;border-radius:12px}
+.modes{display:flex;justify-content:space-between;align-items:center;margin:12px 0 4px;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px}.tabs button{padding:4px 12px;font-size:13px;border-radius:99px}.tabs button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.chk{font-size:13px;color:var(--mut);display:flex;gap:6px;align-items:center;margin:0}.chk input{width:auto;accent-color:var(--ac)}
+#chat{flex:1;min-height:260px;max-height:52vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:8px 2px}
+.m{max-width:86%;padding:10px 14px;border-radius:16px;white-space:pre-wrap}.m.ai{background:#12141c;border:1px solid #ffffff14;align-self:flex-start}
+.m.me{background:linear-gradient(135deg,#1f6bff,#0a3fc4);color:#fff;align-self:flex-end}
+.fb{align-self:flex-end;max-width:86%;font-size:13px;border-left:3px solid var(--warn);background:#12141c;padding:8px 12px;border-radius:8px}
+.fb.good{border-color:var(--ok)}.fb s{color:var(--bad)}.fb ins{color:var(--ok);text-decoration:none;font-weight:600}.fb i{color:var(--mut)}
+.stat{font-size:12px;color:var(--mut);margin:4px 4px 10px}
+.week{margin-bottom:14px}.week h3{font-size:14px;margin:0 0 6px;color:var(--mut);font-weight:500}
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.day{text-align:left;padding:10px;border-radius:14px;font-size:13px;line-height:1.3;position:relative}
+.day b{display:block;font-size:12px;color:var(--mut)}.day.done{border-color:var(--ok)}.day.done::after{content:attr(data-s);position:absolute;top:8px;right:10px;color:var(--ok);font-weight:700}
+.day.cur{outline:2px solid var(--ac)}
+.bars div{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:13px}.bars span{width:110px}.bars em{flex:1;height:8px;background:var(--line);border-radius:9px;overflow:hidden}.bars em i{display:block;height:100%;background:var(--ac)}
+.big{font-size:44px;font-weight:700;color:#6d9bff}ul{margin:4px 0;padding-left:20px}
+input,select{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--in);color:var(--ink);width:100%}
+label{font-size:13px;color:var(--mut);display:block;margin:8px 0 3px}
+/* login (glass over landscape) */
+#login{max-width:400px;margin:9vh auto 0;padding:34px 28px 22px;border-radius:26px;color:#fff;border:2px solid #ffffffb3;background:linear-gradient(165deg,#ffffff40 0,#3a3a30a0 38%,#2c2c22b0 100%);backdrop-filter:blur(16px) saturate(1.1);box-shadow:0 20px 60px #0004}
+#login h2{font-size:30px;font-weight:700;margin:20px 0 6px}#login .sub{margin:0 0 26px;font-size:15px}
+.f{position:relative;margin-bottom:14px}.f input{background:transparent;border:1.5px solid #ffffffb0;border-radius:18px;padding:16px 46px 16px 20px;color:#fff;font-size:15px}
+.f input::placeholder{color:#ffffffb8}.f svg{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:24px;height:24px;stroke:#ffffffcc;fill:none;stroke-width:1.5;pointer-events:none}
+.f input:disabled{opacity:.7}.rm{color:#fff;display:flex;align-items:center;gap:10px;font-size:14px;margin:4px 0 22px}.rm input{width:22px;height:22px;accent-color:#3dae4e;padding:0}
+.lg{width:100%;border:0;border-radius:16px;padding:16px;font-size:20px;font-weight:600;color:#fff;background:linear-gradient(90deg,#b4bf1e,#1f9d5d)}
+.sw{text-align:center;margin:14px 0 0;font-size:14px}.sw b{cursor:pointer;font-weight:700}
+.sm{display:flex;gap:8px;justify-content:center;margin:-4px 0 10px}.sm button{background:#ffffff22;border-color:#ffffff55;color:#fff;padding:3px 12px;font-size:12px}
+#lerr{color:#ffb4bb;margin:0 0 10px;min-height:20px;font-size:13px}.credit{text-align:center;font-size:12px;margin:26px 0 0;color:#ffffffd0}
+body{padding-bottom:84px}
+#bnav{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(440px,calc(100% - 24px));display:flex;gap:2px;padding:6px;border-radius:22px;background:rgba(10,12,22,.78);backdrop-filter:blur(16px);border:1px solid #ffffff22;box-shadow:0 12px 40px #0008;z-index:20}
+#bnav button{flex:1;border:0;background:none;border-radius:16px;padding:6px 2px;font-size:11px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:1px}
+#bnav button i{font-style:normal;font-size:19px;line-height:1.2;color:var(--ink)}#bnav button.on{background:#1f6bff33;color:#fff}#bnav button:disabled{opacity:.35}
+.gs{display:flex;gap:8px;flex-wrap:wrap}.gs input{flex:1;min-width:180px}.gh{font-size:15px;margin:16px 0 4px}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:13px 16px;border-radius:14px;font-size:15px}.opt.ok{border-color:var(--ok);background:#2fd27a22}.opt.no{border-color:var(--bad);background:#ff5d6c22}
+.gtip{background:#f0a43a18;border-left:3px solid var(--warn);padding:9px 12px;border-radius:8px;margin:12px 0}
+.gbar{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:8px}.gbar i{display:block;height:100%;background:var(--ac);transition:width .3s}
+/* certificate */
+#certPage{background:#fffdf6;color:#3b2f12;border:10px double #b8923a;padding:40px 24px;text-align:center;font-family:Georgia,serif;border-radius:4px}
+#certPage h1{font-size:34px;letter-spacing:2px;margin:6px 0;color:#8a6a1c}#certPage .nm{font-size:34px;font-style:italic;border-bottom:1px solid #b8923a;display:inline-block;padding:0 24px;margin:10px 0}
+#certPage .gr{display:inline-block;margin:14px 0;padding:6px 20px;border:2px solid #8a6a1c;color:#8a6a1c;font-weight:700;letter-spacing:2px}#certPage p{margin:6px 0}.np{margin-top:12px}
+@media print{#bnav,header,#home,#set,#sess,#res,#gram,.np,#bgApp,#bgAuth{display:none!important}body{background:#fff}#cert{display:block!important}}
+@media(max-width:520px){header{gap:6px}header button{padding:3px 10px;font-size:12px}header .pill{font-size:12px}#sDone,#sStreak,#sAvg{display:none}header{padding:10px 14px}.dk{width:104px}.dk2{left:104px}.dk3{left:196px}.headline{font-size:31px}.panel{padding:16px;border-radius:26px}}
+.hide{display:none!important}.mut{color:var(--mut);font-size:13px}
+</style></head><body>
+<div id="bgApp"></div>
+<div id="bgAuth"><svg viewBox="0 0 400 800" preserveAspectRatio="none"><defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6e9db4"/><stop offset=".45" stop-color="#a9c3c0"/><stop offset=".62" stop-color="#ecc98c"/><stop offset="1" stop-color="#ecc98c"/></linearGradient>
+<linearGradient id="h1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a6c43c"/><stop offset="1" stop-color="#5f8f23"/></linearGradient>
+<linearGradient id="h2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fb532"/><stop offset="1" stop-color="#4b7e1c"/></linearGradient>
+<linearGradient id="h3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7aa52a"/><stop offset="1" stop-color="#3f6f17"/></linearGradient></defs>
+<rect width="400" height="800" fill="url(#sky)"/>
+<path d="M0 232 L40 226 L90 234 L150 228 L400 238 L400 270 L0 270Z" fill="#7f9fb0" opacity=".6"/>
+<path d="M0 262 C60 240 110 246 170 262 C230 278 300 240 400 230 L400 340 L0 340Z" fill="#6a8f5e"/>
+<path d="M0 300 C80 270 160 290 240 320 C300 340 350 300 400 250 L400 800 L0 800Z" fill="url(#h2)"/>
+<path d="M170 330 C250 300 330 330 400 300 L400 800 L120 800 C190 620 240 480 170 330Z" fill="url(#h1)" opacity=".9"/>
+<path d="M0 420 C60 400 120 430 160 520 C190 600 150 700 90 800 L0 800Z" fill="url(#h3)"/>
+<path d="M230 560 C300 520 360 560 400 540 L400 800 L220 800 C260 700 280 620 230 560Z" fill="#6f9c28" opacity=".8"/>
+<path d="M0 690 C60 670 120 690 200 740 L200 800 L0 800Z" fill="#3b6b16"/>
+<g fill="#26421a"><ellipse cx="30" cy="745" rx="38" ry="22"/><ellipse cx="85" cy="760" rx="30" ry="18"/><ellipse cx="150" cy="775" rx="40" ry="20"/><ellipse cx="20" cy="790" rx="50" ry="22"/></g></svg></div>
+<header><div class="logo"><svg viewBox="0 0 24 24"><path d="M2 6l8.5 15L22 3h-3.5L10.5 15.5 5.5 6z" fill="#fff"/></svg>AI Speaking Coach</div>
+<div class="stats hide" id="hdr"><span class="pill" id="who"></span><span class="pill" id="sDone">0/30 days</span><span class="pill" id="sStreak">🔥 0 streak</span><span class="pill" id="sAvg">Avg —</span>
+<button onclick="gOpen()">📘 Grammar</button><button onclick="show('set')">⚙️ Settings</button><button onclick="logout()">Logout</button></div></header>
+<main>
+<section id="login" class="card hide">
+<h2 id="lTitle">Login</h2><p class="sub" id="lhint">Welcome back, please login to your account</p>
+<div id="lnW" class="f hide"><input id="ln" placeholder="Full Name" aria-label="Full name" autocomplete="name"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+<div class="f"><input id="lm" inputmode="numeric" placeholder="Mobile Number" aria-label="Mobile number" autocomplete="tel"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div>
+<div id="otpW" class="hide"><div class="f"><input id="lo" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" aria-label="OTP" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')otpBtn()"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></div>
+<div class="sm"><button id="rsB" onclick="sendOtp()" disabled>Resend OTP</button><button onclick="authMode(reg?'reg':'login')">Change number</button></div></div>
+<label class="rm"><input type="checkbox" id="rm" checked>Remember me</label>
+<p id="lerr"></p>
+<button class="lg" id="lgB" onclick="otpBtn()">Send OTP</button>
+<p class="sw" id="swTxt">Don't have an account? <b onclick="authMode('reg')">Signup</b></p>
+<p class="credit">We verify your mobile by OTP · AI Speaking Coach</p></section>
+
+<section id="set" class="card hide">
+<h2>Settings</h2><p class="mut">Your level and goal tune the coach's feedback. Saved to your account.</p>
+<label>Your level</label><select id="lvl"><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option></select>
+<label>Goal</label><input id="goal" value="Crack internship interviews with confident professional English">
+<p><button class="p" onclick="saveSet()">Save</button> <button onclick="show('home')">Back</button></p>
+</section>
+
+<section id="home">
+<div class="panel hero">
+<div class="phTop"><div class="logo"><svg viewBox="0 0 24 24"><path d="M2 6l8.5 15L22 3h-3.5L10.5 15.5 5.5 6z" fill="#fff"/></svg>speakcoach</div><button class="dots" onclick="show('set')" aria-label="Settings">•••</button></div>
+<div class="orb"><svg viewBox="0 0 24 24"><path d="M12 1C13 8 16 11 23 12 16 13 13 16 12 23 11 16 8 13 1 12 8 11 11 8 12 1Z" fill="#fff"/></svg></div>
+<h2 class="headline"><span class="g">Your</span> next big<br>move <span class="g">starts here</span></h2>
+<div class="deck"><div class="dk dk1"><small>Today's lesson</small><b id="dk1">—</b></div><div class="dk dk2"><small>Progress</small><b id="dk2">—</b></div><div class="dk dk3"><small>Target</small><b>Score 80+</b></div></div>
+<div class="chips">
+<button class="chip" onclick="startToday()"><span id="chip1">Start today's lesson</span><small>built for your goals</small></button>
+<button class="chip" onclick="startToday('voice')">Practice by voice<small>speak &amp; get corrected</small></button>
+<button class="chip" onclick="gOpen()">Grammar Lab<small>learn any topic &amp; test yourself</small></button>
+<button class="chip" onclick="$('prog').scrollIntoView({behavior:'smooth'})">My progress &amp; certificate<small>30-day journey</small></button></div>
+<div class="barW"><div class="bar2" onclick="startToday()"><span class="plus">+</span><span class="ph">Curious? Let's explore together</span><span class="mic" style="pointer-events:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v4"/></svg></span></div>
+<button class="go" onclick="startToday()" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M7 17L17 7M8 7h9v9"/></svg></button></div>
+</div>
+<div class="card"><h2>🎯 30-Day Targets</h2>
+<ul><li><b>Week 1 – Foundation:</b> fix core grammar, tenses & sentence structure; confident self-introduction.</li>
+<li><b>Week 2 – Workplace English:</b> emails, meetings, polite & professional phrasing.</li>
+<li><b>Week 3 – Interview Mastery:</b> HR, behavioural (STAR) & technical-explanation answers.</li>
+<li><b>Week 4 – Personality & Confidence:</b> storytelling, persuasion, pressure rounds, full mock interview.</li></ul>
+<p class="mut"><b>Day-30 outcome:</b> overall score ≥ 80/100, filler words &lt; 3 per minute, 130+ words/min fluent pace, ≥ 90% grammatically correct answers, and a polished 60-second self-pitch.</p>
+<p class="mut">Daily routine (20 min): 1 text session + 1 voice session. Finish a session to get your score; practising every day builds the streak.</p></div>
+<div class="card" id="prog"><h2>📈 Your Progress</h2><div id="chart"></div><div id="cats" class="bars"></div>
+<p id="certBox" style="margin:10px 0 0"></p></div>
+<div id="grid"></div>
+</section>
+
+<section id="sess" class="hide">
+<div class="panel sessP">
+<div class="phTop"><button class="ic" onclick="show('home')" aria-label="Back">←</button><div class="ttl"><b id="sTitle"></b><span id="sFocus"></span></div><button class="endBtn" id="endB" onclick="finish()" disabled>End &amp; Score</button></div>
+<div class="modes"><div class="tabs"><button id="tT" class="on" onclick="setMode('text')">⌨️ Text</button><button id="tV" onclick="setMode('voice')">🎤 Voice</button></div>
+<label class="chk"><input type="checkbox" id="tts" checked>🔊 AI speaks</label></div>
+<div id="chat"></div>
+<div class="stat" id="stat"></div>
+<div class="barW"><div class="bar2"><button class="plus" onclick="hint()" title="Show scenario hint" aria-label="Hint">+</button>
+<textarea id="inp" rows="1" placeholder="Type your answer…"></textarea>
+<button class="mic" id="mic" onclick="micClick()" aria-label="Speak"></button></div>
+<button class="go" id="send" onclick="send()" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M7 17L17 7M8 7h9v9"/></svg></button></div>
+</div></section>
+
+<nav id="bnav" class="hide"><button id="nBk" onclick="goBack()"><i>←</i>Back</button><button id="nHm" onclick="show('home')"><i>🏠</i>Home</button><button onclick="toProg()"><i>📈</i>Progress</button></nav>
+<section id="gram" class="hide"><div id="gBody"></div></section>
+<section id="res" class="card hide"></section>
+<section id="cert" class="hide"><div id="certPage"></div><p class="np"><button class="p" onclick="print()">🖨️ Print / Save as PDF</button> <button onclick="show('home')">← Back</button></p></section>
+</main>
+<script>
+const W=[["Week 1 · Foundation",[
+["Introduce Yourself","Self-introduction: name, studies, skills, goal","Tell me about yourself, as if we just met at an internship fair."],
+["Present & Past Tenses","Correct tense usage","Describe your typical day, then what you did yesterday."],
+["Future & Plans","Will / going to / would","Where do you see yourself in 6 months? Talk about your plans."],
+["Sentence Building","Clear, complete sentences","Explain your favourite hobby in 5–6 well-built sentences."],
+["Vocabulary Upgrade","Replace basic words with stronger ones","Describe your college/university experience using strong vocabulary."],
+["Articles & Prepositions","a/an/the, in/on/at","Describe your city or hometown to a foreigner."],
+["Week 1 Review","Mix of all fundamentals","Give a 1-minute talk on: the most important skill for a student."]]],
+["Week 2 · Workplace English",[
+["Polite Requests","Please / could / would you","You need leave from your manager for a day. Ask politely."],
+["Email Writing","Subject, tone, closing","Write an email to a professor requesting a recommendation letter."],
+["Meetings & Opinions","Agree, disagree, suggest","We are in a team meeting about a project delay. Give your opinion."],
+["Phone & Video Calls","Clarifying, confirming","I am a client calling about a late delivery. Handle the call."],
+["Giving Updates","Concise status reports","Give a short progress update on a project you worked on."],
+["Handling Feedback","Receiving criticism gracefully","Your mentor says your work was careless. Respond professionally."],
+["Week 2 Review","Professional tone","Pitch a small idea to improve something in your college/office."]]],
+["Week 3 · Interview Mastery",[
+["Tell Me About Yourself","The perfect 60-second pitch","You are in an internship interview. Start: 'Tell me about yourself.'"],
+["Strengths & Weaknesses","Honest yet positive","Interviewer: What are your strengths and one weakness?"],
+["Why This Internship?","Motivation & company fit","Interviewer: Why do you want this internship and why our company?"],
+["STAR Method","Situation-Task-Action-Result","Interviewer: Tell me about a time you solved a problem in a team."],
+["Explaining Projects","Make technical work simple","Interviewer: Explain your best project to a non-technical person."],
+["Tough Questions","Stay calm & structured","Interviewer: Why should we hire you over other candidates?"],
+["Week 3 Review","Interview flow","Mini mock interview: 4–5 mixed questions, one by one."]]],
+["Week 4 · Personality & Confidence",[
+["Storytelling","Hook, story, lesson","Tell me a short story about a challenge that changed you."],
+["Persuasion","Convince with logic & emotion","Convince me that students should learn a new skill every year."],
+["Small Talk & Networking","Break the ice naturally","We meet at a career event. Start a conversation and network."],
+["Body of Voice","Pace, pauses, clarity","Give a 1-minute talk on technology in education — speak slowly and clearly."],
+["Pressure Round","Rapid-fire questions","Rapid-fire: short, confident answers to quick interview questions."],
+["Leadership & Teamwork","Show initiative","Interviewer: Describe a time you led or helped a team."],
+["Group Discussion","Opinion, structure, respect","Group discussion topic: 'Is AI a threat or an opportunity for jobs?'"],
+["Full Mock Interview","Everything together","Full internship interview — 6 questions with follow-ups. Be strict but fair."],
+["Final Pitch","Your best 60 seconds","Deliver your final polished self-introduction + why you deserve this internship."]]]];
+const D=[];W.forEach((w,i)=>w[1].forEach(d=>D.push({t:d[0],f:d[1],p:d[2],w:i})));
+const $=i=>document.getElementById(i),LS=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+let S=null,TOK='';try{TOK=localStorage.getItem('asc_tok')||sessionStorage.getItem('asc_tok')||''}catch(e){}
+/* Demo mode: when no backend is reachable (static hosting, e.g. Netlify), accounts & progress live in this browser. */
+let LOCAL=false;
+const LDB=()=>{try{return JSON.parse(localStorage.getItem('asc_local'))||{users:{},certs:{}}}catch(e){return{users:{},certs:{}}}};
+async function local(path,data){
+ const d=LDB(),sv=()=>{try{localStorage.setItem('asc_local',JSON.stringify(d))}catch(e){}},fail=m=>{throw new Error(m)},td=()=>new Date().toISOString().slice(0,10),
+ cm=m=>String(m||'').replace(/[\s-]/g,'').replace(/^(\+?91)(?=\d{10}$)/,''),me=()=>d.users[TOK]||fail('Please login again.'),clamp=n=>Math.max(0,Math.min(100,Math.round(+n)||0));
+ if(path==='/api/me'){return{user:me(),ai:false}}
+ if(path==='/api/logout')return{ok:1};
+ if(path==='/api/otp/send'){const m=cm(data.mobile),reg=!!data.name,nm=String(data.name||'').trim().replace(/\s+/g,' ');
+  if(!/^[6-9]\d{9}$/.test(m))fail('Enter a valid 10-digit mobile number.');
+  if(reg&&!/^[\p{L} .'-]{2,60}$/u.test(nm))fail('Enter your full name (letters only).');
+  if(reg&&d.users[m])fail('This mobile is already registered. Please use Login.');
+  if(!reg&&!d.users[m])fail('No account for this mobile. Please register first.');
+  const code=String(Math.floor(Math.random()*1e6)).padStart(6,'0');d.otp={m,code,name:reg?nm:null,exp:Date.now()+3e5};sv();return{ok:1,devOtp:code}}
+ if(path==='/api/otp/verify'){const o=d.otp,m=cm(data.mobile);if(!o||o.m!==m||o.exp<Date.now())fail('OTP expired. Please request a new one.');if(o.code!==String(data.otp))fail('Wrong OTP. Please check and try again.');
+  delete d.otp;if(o.name)d.users[m]={name:o.name,mobile:m,lvl:'Intermediate',goal:'Crack internship interviews with confident professional English',days:{},grammar:{}};sv();return{token:m,user:d.users[m],ai:false}}
+ if(path.startsWith('/api/verify/')){const c=d.certs[path.split('/').pop().toUpperCase()];if(!c)fail('Certificate not found');return{cert:c}}
+ const u=me();
+ if(path==='/api/settings'){if(data.lvl)u.lvl=data.lvl;if(data.goal)u.goal=String(data.goal).slice(0,120);sv();return{ok:1}}
+ if(path==='/api/progress'){const o=data.result||{},p=u.days[data.day],dt=td(),last={overall:clamp(o.overall),grammar:clamp(o.grammar),vocabulary:clamp(o.vocabulary),fluency:clamp(o.fluency),confidence:clamp(o.confidence),professionalism:clamp(o.professionalism),summary:String(o.summary||''),strengths:o.strengths||[],improve:o.improve||[],homework:String(o.homework||''),hindi:String(o.hindi||'')};
+  u.days[data.day]={score:Math.max(last.overall,p?p.score:0),date:dt,dates:[...new Set([...(p?p.dates:[]),dt])],last};sv();return{record:u.days[data.day]}}
+ if(path==='/api/grammar'){const k=String(data.topic).slice(0,60),p=(u.grammar=u.grammar||{})[k],pc=data.correct/data.total,keep=p&&p.best/p.total>=pc;
+  u.grammar[k]={title:data.title,best:keep?p.best:data.correct,total:keep?p.total:data.total,attempts:(p?p.attempts:0)+1,last:Math.round(pc*100),date:td()};sv();return{grammar:u.grammar}}
+ if(path==='/api/certificate'){if(Object.keys(u.days).length<30)fail('Complete all 30 days first.');
+  if(!u.certId){const sc=Object.values(u.days).map(x=>x.score),avg=Math.round(sc.reduce((a,b)=>a+b)/30),id='ASC-'+[...crypto.getRandomValues(new Uint8Array(4))].map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+   d.certs[id]={id,name:u.name,mobileTail:u.mobile.slice(-4),avg,best:Math.max(...sc),date:td(),grade:avg>=80?'DISTINCTION':avg>=65?'MERIT':'COMPLETION'};u.certId=id;sv()}return{cert:d.certs[u.certId]}}
+ fail('AI lessons and AI chat need the server version. Free mode is active.')}
+async function srv(path,data,method){
+ if(LOCAL)return local(path,data);
+ const r=await fetch(path,{method:method||(data?'POST':'GET'),headers:{'content-type':'application/json',...(TOK?{authorization:'Bearer '+TOK}:{})},body:data?JSON.stringify(data):undefined});
+ const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||'Server error');e.status=r.status;throw e}return j}
+let reg=false;
+let otpSent=false,cd=null;
+function authMode(m){reg=m==='reg';otpSent=false;clearInterval(cd);$('otpW').classList.add('hide');$('lm').disabled=$('ln').disabled=false;$('lo').value='';
+ $('lnW').classList.toggle('hide',!reg);$('lgB').textContent='Send OTP';$('lerr').textContent='';$('lTitle').textContent=reg?'Sign up':'Login';
+ $('lhint').textContent=reg?'Create your account to start your 30-day course':'Welcome back, please login to your account';
+ $('swTxt').innerHTML=reg?`Already have an account? <b onclick="authMode('login')">Login</b>`:`Don't have an account? <b onclick="authMode('reg')">Signup</b>`}
+const otpBtn=()=>otpSent?verifyOtp():sendOtp();
+const cleanM=()=>$('lm').value.replace(/[\s-]/g,'').replace(/^(\+?91)(?=\d{10}$)/,'');
+async function sendOtp(){
+ const er=t=>{$('lerr').textContent=t},m=cleanM();
+ if(!/^[6-9]\d{9}$/.test(m))return er('Please enter a valid 10-digit mobile number.');
+ if(reg&&$('ln').value.trim().length<2)return er('Please enter your full name.');
+ $('lgB').disabled=true;$('rsB').disabled=true;er('');
+ try{const j=await srv('/api/otp/send',{mobile:m,...(reg?{name:$('ln').value}:{})});
+  otpSent=true;$('otpW').classList.remove('hide');$('lm').disabled=$('ln').disabled=true;$('lgB').textContent='Verify & Start →';$('lo').focus();
+  if(j.devOtp)$('lo').value=j.devOtp;
+  let s=30;$('rsB').textContent='Resend in '+s+'s';clearInterval(cd);cd=setInterval(()=>{s--;if(s<=0){clearInterval(cd);$('rsB').disabled=false;$('rsB').textContent='Resend OTP'}else $('rsB').textContent='Resend in '+s+'s'},1000);
+ }catch(e){er(e.message);$('rsB').disabled=!otpSent}
+ $('lgB').disabled=false}
+async function verifyOtp(){
+ const er=t=>{$('lerr').textContent=t},o=$('lo').value.trim();
+ if(!/^\d{6}$/.test(o))return er('Enter the 6-digit OTP.');
+ $('lgB').disabled=true;er('');
+ try{const j=await srv('/api/otp/verify',{mobile:cleanM(),otp:o});
+  TOK=j.token;try{($('rm').checked?localStorage:sessionStorage).setItem('asc_tok',TOK)}catch(e){}clearInterval(cd);boot(j)}catch(e){er(e.message)}
+ $('lgB').disabled=false}
+function boot(j){AI=!!j.ai;S=j.user;S.key=AI;$('who').textContent='👤 '+S.name;$('hdr').classList.remove('hide');show('home')}
+let AI=false;
+const save=()=>{if(S)srv('/api/settings',{lvl:S.lvl,goal:S.goal}).catch(()=>{})};
+async function logout(){speechSynthesis.cancel();try{await srv('/api/logout',{})}catch(e){}S=null;TOK='';try{localStorage.removeItem('asc_tok');sessionStorage.removeItem('asc_tok')}catch(e){}$('hdr').classList.add('hide');authMode('login');$('lm').value='';show('login')}
+let day=0,hist=[],turns=[],mode='text',rec=null,speakMs=0,busy=false,t0=0;
+
+let cur='login',NAV=[];
+const hpush=()=>{try{history.pushState({},'')}catch(e){}};
+function show(id,back){['login','set','home','sess','res','cert','gram'].forEach(x=>$(x).classList.toggle('hide',x!==id));document.body.classList.toggle('auth',id==='login');scrollTo(0,0);if(id==='set'){$('lvl').value=S.lvl;$('goal').value=S.goal}if(id==='home')render();speechSynthesis.cancel();
+ if(id!==cur){if(id==='home'||id==='login')NAV=[];else if(!back){NAV.push(cur);hpush()}}cur=id;
+ $('bnav').classList.toggle('hide',id==='login'||id==='sess');
+ $('nBk').disabled=id==='home';$('nHm').classList.toggle('on',id==='home')}
+function goBack(){
+ if(cur==='gram'&&G.view==='lesson')return gList();
+ if(cur==='gram'&&(G.view==='quiz'||G.view==='result'))return G.t&&G.run&&G.run.key!=='mixed'?gLesson(G.t.id):gList();
+ if(cur==='sess'&&turns.length&&!confirm('Leave this session? Your answers will not be scored.'))return;
+ let t;do{t=NAV.pop()}while(t==='sess'||t==='res');
+ if(cur==='home'){return}show(t||'home',true)}
+addEventListener('popstate',()=>{if(S&&cur!=='login')goBack()});
+function toProg(){show('home');setTimeout(()=>$('prog').scrollIntoView({behavior:'smooth'}),50)}
+function saveSet(){S.lvl=$('lvl').value;S.goal=$('goal').value;save();show('home')}
+function render(){
+ let g='',n=0;W.forEach((w,wi)=>{g+=`<div class="week"><h3>${w[0]}</h3><div class="days">`;w[1].forEach(()=>{const d=D[n],r=S.days[n];g+=`<button class="day ${r?'done':''} ${n==next()?'cur':''}" data-s="${r?r.score:''}" onclick="start(${n})"><b>Day ${n+1}</b>${d.t}</button>`;n++});g+='</div></div>'});
+ $('grid').innerHTML=g;
+ const ks=Object.values(S.days),sc=ks.map(x=>x.score);
+ $('sDone').textContent=ks.length+'/30 days';$('sAvg').textContent='Avg '+(sc.length?Math.round(sc.reduce((a,b)=>a+b)/sc.length):'—');
+ const ds=new Set(ks.flatMap(x=>x.dates||[x.date])),f=d=>d.toISOString().slice(0,10);let c=0,d=new Date();if(!ds.has(f(d)))d.setDate(d.getDate()-1);while(ds.has(f(d))){c++;d.setDate(d.getDate()-1)}
+ $('sStreak').textContent='🔥 '+c+' streak';chart(ks,sc);
+ const nx=next();$('dk1').textContent=D[nx].t;$('dk2').textContent=ks.length+'/30 days';$('chip1').textContent=(S.days[nx]?'Practise Day ':ks.length?'Continue Day ':'Start Day ')+(nx+1)+': '+D[nx].t}
+function startToday(m){start(next());if(m)setMode(m)}
+function hint(){add('m ai','💡 Scenario: '+D[day].p)}
+function micClick(){setMode('voice');toggleMic()}
+function chart(ks,sc){
+ const w=600,h=180,p=26,bw=(w-p)/30;let s=`<svg viewBox="0 0 ${w} ${h+22}" style="width:100%;height:auto" role="img" aria-label="Daily score chart">`;
+ [0,50,80,100].forEach(v=>{const y=h-v/100*(h-10);s+=`<line x1="${p}" x2="${w}" y1="${y}" y2="${y}" stroke="${v==80?'var(--ok)':'var(--line)'}" ${v==80?'stroke-dasharray="4"':''}/><text x="0" y="${y+4}" font-size="10" fill="var(--mut)">${v}</text>`});
+ let pts=[];for(let i=0;i<30;i++){const r=S.days[i],x=p+i*bw+bw/2;if(i%5==4||i==0)s+=`<text x="${x}" y="${h+14}" font-size="10" text-anchor="middle" fill="var(--mut)">${i+1}</text>`;
+  if(r){const y=h-r.score/100*(h-10);s+=`<rect x="${x-bw*.32}" y="${y}" width="${bw*.64}" height="${h-y}" rx="2" fill="${r.score>=80?'var(--ok)':'var(--ac)'}"><title>Day ${i+1}: ${r.score}</title></rect>`;pts.push(x+','+y)}}
+ if(pts.length>1)s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="var(--warn)" stroke-width="2"/>`;
+ $('chart').innerHTML=s+'</svg><div class="mut">Bars = best score per day (green ≥ 80 target, dashed line) · orange line = trend · x-axis = day</div>';
+ const cs=['grammar','vocabulary','fluency','confidence','professionalism'],L=ks.filter(x=>x.last);
+ $('cats').innerHTML=L.length?'<p class="mut" style="margin:10px 0 0">Average by skill</p>'+cs.map(c=>{const v=Math.round(L.reduce((a,b)=>a+(b.last[c]||0),0)/L.length);return `<div><span>${c[0].toUpperCase()+c.slice(1)}</span><em><i style="width:${v}%"></i></em><b>${v}</b></div>`}).join(''):'<p class="mut">Finish a session to see your progress.</p>';
+ const full=ks.length>=30;$('certBox').innerHTML=full?'<button class="p" onclick="certificate()">🏆 View your 30-Day Certificate</button>':`<span class="mut">🏆 Certificate unlocks after all 30 days (${ks.length}/30 done).</span>`}
+async function certificate(){
+ let c;try{c=(await srv('/api/certificate',{})).cert}catch(e){return alert(e.message)}
+ drawCert(c,true)}
+function drawCert(c,mine){
+ const avg=c.avg,best=c.best,late=c.date,gr=c.grade,cid=c.id,nm=c.name,url=location.origin+'/#verify='+c.id;
+ $('certPage').innerHTML=`<div style="font-size:42px">🏆</div><p style="letter-spacing:3px">CERTIFICATE OF ACHIEVEMENT</p><h1>30-Day English Communication Mastery</h1><p>This is proudly presented to</p><div class="nm">${esc(nm)}</div>
+ <p>for successfully completing all 30 days of professional communication and interview-readiness training<br>in written and spoken English.</p><div class="gr">${gr}</div>
+ <p>Average score <b>${avg}/100</b> · Best day <b>${best}/100</b> · Days completed <b>30/30</b></p><p style="margin-top:22px">Completed on ${late} · AI Speaking Coach</p><p style="font-size:12px;color:#8a7a50">Mobile ******${esc(c.mobileTail)} · Certificate ID ${esc(cid)}<br>Verify: ${esc(url)}</p>`;show('cert')}
+const next=()=>{for(let i=0;i<30;i++)if(!S.days[i])return i;return 29};
+
+function start(n){
+ day=n;hist=[];turns=[];t0=Date.now();speakMs=0;$('chat').innerHTML='';$('endB').disabled=true;
+ const d=D[n];$('sTitle').textContent=`Day ${n+1}: ${d.t}`;$('sFocus').textContent='Focus: '+d.f+(S.key?'':' · 🆓 Free offline mode');show('sess');setMode(mode);
+ call(`Begin the session. Give a 1-sentence welcome (and one Hinglish encouragement line), then ask the first question for this scenario.`,true);}
+function sys(){const d=D[day];return `You are a warm, strict-but-encouraging English speaking coach for an Indian student (Hindi-English speaker), level ${S.lvl}. Goal: ${S.goal}. Today's lesson (Day ${day+1}): "${d.t}" — focus: ${d.f}. Scenario: ${d.p}
+Hold a natural conversation: react briefly to what they said, then ask ONE follow-up question. Keep replies under 50 words. For the user's latest message, check grammar, word choice, tone and professionalism.
+Reply ONLY with JSON: {"reply":"your conversational reply+follow-up","corrected":"improved version of user's last message (same meaning, professional)","mistakes":[{"w":"wrong phrase","r":"right phrase","why":"short reason"}],"tip":"one short Hindi/Hinglish tip (optional, may be empty)","ok":true if message was already good}. For the opening turn use only {"reply":...}.`}
+async function api(system,messages,max){
+ const j=await srv('/api/ai',{system,messages,max_tokens:max});
+ const m=j.text.match(/\{[\s\S]*\}/);if(!m)throw new Error('Bad reply');return JSON.parse(m[0])}
+function add(c,h){const e=document.createElement('div');e.className=c;e.innerHTML=h;$('chat').appendChild(e);$('chat').scrollTop=1e9;return e}
+const esc=s=>String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+async function call(text,first,dur){
+ if(busy)return;busy=true;$('send').disabled=true;const th=add('m ai','…');
+ hist.push({role:'user',content:text});
+ try{const o=S.key?await api(sys(),hist.slice(-12),500):localTurn(text,first);th.textContent=o.reply;hist.push({role:'assistant',content:o.reply});
+  if(!first){const L=turns[turns.length-1];L.mistakes=(o.mistakes||[]).length;
+   let h=o.ok&&!(o.mistakes||[]).length?'✅ <b>Great!</b> No mistakes.':'';
+   (o.mistakes||[]).forEach(m=>h+=`<div><s>${esc(m.w)}</s> → <ins>${esc(m.r)}</ins> <i>${esc(m.why)}</i></div>`);
+   if(o.corrected&&!o.ok)h+=`<div style="margin-top:4px">💡 <b>Better:</b> ${esc(o.corrected)}</div>`;if(o.tip)h+=`<div class="mut">🇮🇳 ${esc(o.tip)}</div>`;
+   add('fb '+(o.ok?'good':''),h)}
+  if($('tts').checked)speak(o.reply);if(turns.length>=3)$('endB').disabled=false;
+ }catch(e){th.textContent='⚠️ '+e.message;hist.pop()}
+ busy=false;$('send').disabled=false;stat()}
+function send(){const t=$('inp').value.trim();if(!t||busy)return;$('inp').value='';const words=t.split(/\s+/).length,fill=(t.match(/\b(um+|uh+|hmm+|like|you know|basically|actually)\b/gi)||[]).length;
+ turns.push({t,words,fill,voice:mode==='voice',ms:speakMs});speakMs=0;add('m me',esc(t));call(t)}
+function stat(){const w=turns.reduce((a,b)=>a+b.words,0);$('stat').textContent=`${turns.length} answers · ${w} words${turns.length<3?' · answer 3+ times to unlock scoring':''}`}
+$('inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+
+function speak(t){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-IN';u.rate=.95;speechSynthesis.speak(u)}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function setMode(m){mode=m;$('tT').classList.toggle('on',m==='text');$('tV').classList.toggle('on',m==='voice');
+ $('inp').placeholder=m==='voice'?'Tap the mic and speak…':'Type your answer…';
+ if(m==='voice'&&!SR)alert('Voice input needs Chrome or Edge. Use text mode otherwise.')}
+function toggleMic(){
+ if(rec){rec.stop();return}if(!SR)return;speechSynthesis.cancel();
+ rec=new SR();rec.lang='en-IN';rec.interimResults=true;rec.continuous=true;let fin='',st=Date.now();
+ rec.onresult=e=>{let i='';fin='';for(const r of e.results){(r.isFinal?fin+=r[0].transcript:i+=r[0].transcript)}$('inp').value=(fin+i).trim()};
+ rec.onend=()=>{speakMs=Date.now()-st;rec=null;$('mic').classList.remove('on');$('mic').innerHTML=MIC;if($('inp').value.trim())send()};
+ rec.onerror=e=>{if(e.error==='not-allowed')alert('Allow microphone access.')};
+ rec.start();$('mic').classList.add('on');$('mic').innerHTML='■'}
+const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v4"/></svg>';$('mic').innerHTML=MIC;
+
+async function finish(){
+ if(rec)rec.stop();speechSynthesis.cancel();$('endB').disabled=true;$('endB').textContent='Scoring…';
+ const w=turns.reduce((a,b)=>a+b.words,0),f=turns.reduce((a,b)=>a+b.fill,0),vm=turns.filter(t=>t.voice&&t.ms>3000),wpm=vm.length?Math.round(vm.reduce((a,b)=>a+b.words,0)/(vm.reduce((a,b)=>a+b.ms,0)/60000)):null;
+ const m=turns.reduce((a,b)=>a+(b.mistakes||0),0);
+ const sy=`You are an expert English examiner scoring a practice session (level ${S.lvl}, goal: ${S.goal}). Stats: ${turns.length} answers, ${w} words, ${m} mistakes flagged, ${f} filler words${wpm?`, speaking pace ${wpm} wpm (ideal 120-150)`:', text-only'}. Review the whole conversation (user turns) and score honestly out of 100.
+Reply ONLY JSON: {"overall":n,"grammar":n,"vocabulary":n,"fluency":n,"confidence":n,"professionalism":n,"summary":"2 sentences","strengths":["..",".."],"improve":["..",".."],"homework":"one concrete task for tomorrow","hindi":"one motivating Hinglish line"}`;
+ try{const o=!S.key?localScore(w,f,wpm):await api(sy,[{role:'user',content:'Transcript:\n'+hist.slice(1).map(x=>(x.role==='user'?'STUDENT: ':'COACH: ')+x.content).join('\n')+'\n\nScore the student now.'}],700);
+  const pr=await srv('/api/progress',{day,result:o});S.days[day]=pr.record;result(o,wpm,f,w)
+ }catch(e){alert('Scoring failed: '+e.message)}$('endB').textContent='🏁 End & Score'}
+function result(o,wpm,f,w){
+ const bar=(n,v)=>`<div><span>${n}</span><em><i style="width:${v}%"></i></em><b>${v}</b></div>`;
+ $('res').innerHTML=`<h2>Day ${day+1} Result · ${D[day].t}</h2><div class="big">${o.overall}<span class="mut">/100</span></div><p>${esc(o.summary)}</p>
+ <div class="bars">${bar('Grammar',o.grammar)}${bar('Vocabulary',o.vocabulary)}${bar('Fluency',o.fluency)}${bar('Confidence',o.confidence)}${bar('Professional',o.professionalism)}</div>
+ <p class="mut">${w} words · ${f} filler words${wpm?` · ${wpm} words/min`:''}</p>
+ <h2>✅ Strengths</h2><ul>${o.strengths.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+ <h2>🔧 Improve</h2><ul>${o.improve.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+ <p><b>📝 Homework:</b> ${esc(o.homework)}</p><p class="mut">🇮🇳 ${esc(o.hindi)}</p>
+ <button class="p" onclick="show('home')">Back to plan</button> <button onclick="start(${day})">Retry this day</button>`;show('res')}
+/* ---------- Free offline coach (no API key): rule-based ---------- */
+const RULES=[[/\bi am agree\b/gi,'I agree','"agree" is a verb, no "am"'],[/\b(he|she|it) don'?t\b/gi,'$1 doesn\'t','he/she/it → doesn\'t'],[/\b(he|she|it) have\b/gi,'$1 has','he/she/it → has'],
+[/\bI is\b/g,'I am','I → am'],[/\b(we|they|you) is\b/gi,'$1 are','we/you/they → are'],[/\bI has\b/g,'I have','I → have'],[/\bdiscuss about\b/gi,'discuss','"discuss" needs no "about"'],
+[/\bmore better\b/gi,'better','double comparative'],[/\bprepone\b/gi,'bring forward','"prepone" is not standard English'],[/\bI am (knowing|understanding|wanting|having a doubt)\b/gi,(m,a)=>({knowing:'I know',understanding:'I understand',wanting:'I want','having a doubt':'I have a doubt'}[a.toLowerCase()]),'stative verbs avoid -ing'],
+[/\b(my|your) good name\b/gi,'$1 name','just say "name"'],[/\b(did not|didn'?t|did) (went|came|saw|took|ate)\b/gi,(m,a,b)=>"didn't "+{went:'go',came:'come',saw:'see',took:'take',ate:'eat'}[b.toLowerCase()],'after did/didn\'t use base verb'],
+[/\binformations\b/gi,'information','uncountable noun'],[/\badvices\b/gi,'advice','uncountable noun'],[/\bcan able to\b/gi,'can','use "can" or "am able to"'],
+[/\bI (student|fresher|engineer)\b/g,'I am a $1','missing "am a"'],[/\bI am (student|fresher|engineer)\b/g,'I am a $1','missing article "a"'],[/\bmuch (books|people|friends|students|projects)\b/gi,'many $1','countable → many'],
+[/\bsince (\d+|a few|few) (years|months|days)\b/gi,'for $1 $2','"for" + duration'],[/\ba (?!u|eu|one|ho)([aeio]\w*)/gi,'an $1','"an" before vowel sound'],[/\bI am from last\b/gi,'I have been here since','tense'],
+[/\bi\b/g,'I','"I" is always capital'],[/\b(gonna)\b/gi,'going to','too informal'],[/\b(wanna)\b/gi,'want to','too informal'],[/\b(\w+) \1\b/gi,'$1','repeated word']];
+function localTurn(text,first){
+ const d=D[day];if(first)return{reply:`Welcome to Day ${day+1}: ${d.t}! 🆓 Free practice mode — I'll check common grammar mistakes and keep the conversation going. Aap kar sakte ho! 💪\n\n${d.p}`};
+ let fixed=text.replace(/\s+/g,' ').trim(),ms=[];
+ RULES.forEach(([re,rep,why])=>{const one=new RegExp(re.source,re.flags.replace('g',''));
+  fixed=fixed.replace(re,(...a)=>{const o=a[0],r=typeof rep==='function'?rep(...a):o.replace(one,rep);if(r!==o)ms.push({w:o,r,why});return r})});
+ const seen=new Set();ms=ms.filter(m=>!seen.has(m.w.toLowerCase())&&seen.add(m.w.toLowerCase()));
+ const c=fixed.charAt(0).toUpperCase()+fixed.slice(1);if(c!==fixed){ms.push({w:fixed.slice(0,12),r:c.slice(0,12),why:'start a sentence with a capital letter'});fixed=c}
+ if(!/[.!?]$/.test(fixed)){fixed+='.';ms.push({w:'(no full stop)',r:'end with . ? !',why:'finish sentences with punctuation'})}
+ const wd=text.trim().split(/\s+/).length,fl=(text.match(/\b(um+|uh+|hmm+|like|you know|basically|actually)\b/gi)||[]).length;
+ let tip=wd<8?'Jawab chhota hai — 2-3 vaakya mein explain karo (kyun? kaise? example?).':fl>1?'Filler words (um, like) kam karo — ruk kar ek second soch lo, phir bolo.':ms.length?'Corrected sentence ko ek baar zor se bolo — yaad rahega.':'Bahut badhiya! Ab thoda aur detail aur example add karo.';
+ const Q=[["Interesting! Can you give me a specific example?","Why is that important to you?","What is one challenge you faced with this, and how did you handle it?","How would you explain that to someone new?","What would you do differently next time?","Great. Summarise your answer in one confident sentence."],
+ ["Good point. How would you say that more politely or professionally?","What result did you expect, and what actually happened?","Who else is involved, and how would you communicate with them?","What is your next step?","How would you handle it if someone disagreed?","Sum up your main point in one clear sentence."],
+ ["Nice. Can you structure that using Situation, Task, Action and Result?","What was your exact role in it?","What did you learn from it?","How does this make you a good fit for the internship?","What is your biggest strength shown here?","Now say your answer again in 30 seconds, clearly."],
+ ["Good. Can you tell that as a short story with a beginning, middle and end?","What emotion did you feel, and why?","How would you convince a sceptical person of this?","What is the one key message you want people to remember?","How did you stay confident under pressure?","Finish with a strong closing line."]][d_w()];
+ const n=turns.length-1,reac=ms.length?['Good try!','Nice effort!','Let me help with a few fixes.'][n%3]:['Well said!','Excellent!','That sounded good!'][n%3];
+ return{reply:`${reac} ${Q[Math.min(n,Q.length-1)]}`,corrected:fixed,mistakes:ms.slice(0,5),tip,ok:!ms.length&&wd>=8,_n:ms.length}}
+const d_w=()=>D[day].w;
+function localScore(w,f,wpm){
+ const T=turns.length,m=turns.reduce((a,b)=>a+(b.mistakes||0),0),txt=turns.map(t=>t.t||'').join(' '),words=txt.toLowerCase().match(/[a-z']+/g)||[],lu=new Set(words.filter(x=>x.length>=6)).size,
+ slang=(txt.match(/\b(gonna|wanna|dude|bro|yaar|ok ok)\b/gi)||[]).length,avg=w/T,cl=(x,lo=35,hi=97)=>Math.round(Math.max(lo,Math.min(hi,x)));
+ const g=cl(98-m/T*14),v=cl(45+lu*3.2),fl=cl((wpm?100-Math.abs(wpm-135)*.7:40+avg*3)-f*2.5),co=cl(92-f*4-turns.filter(t=>t.words<6).length*8),pr=cl(g*.6+40-slang*8);
+ const sc={Grammar:g,Vocabulary:v,Fluency:fl,Confidence:co,Professionalism:pr},low=Object.entries(sc).sort((a,b)=>a[1]-b[1]),hw={Grammar:'Write 5 sentences using today\'s corrected phrases.',Vocabulary:'Learn 5 new strong words and use each in a sentence.',Fluency:'Speak for 1 full minute on any topic without stopping.',Confidence:'Record yourself answering 3 questions with no fillers.',Professionalism:'Rewrite 3 casual sentences in a formal tone.'};
+ return{overall:Math.round((g*2+v+fl*1.5+co+pr)/6.5),grammar:g,vocabulary:v,fluency:fl,confidence:co,professionalism:pr,summary:`Free offline estimate based on grammar rules, word variety, length and filler words. Add an API key in Settings for deeper AI feedback.`,
+ strengths:[`Strongest area: ${low[4][0]} (${low[4][1]})`,`You completed ${T} answers (${w} words) — keep the habit!`],improve:[`Focus on ${low[0][0]} (${low[0][1]})`,m?`${m} grammar fixes were flagged — review the green corrections.`:'Add more detail and examples to your answers.'],homework:hw[low[0][0]],hindi:'Roz thoda practice — 30 din mein bada farak dikhega! 🔥'}}
+/* ---------- Grammar Lab ---------- */
+const T=(id,c,t,r,e,m,q)=>({id,c,t,r,e,m,q});
+const GT=[
+T('art','Basics','Articles: a / an / the',["Use a before a consonant sound and an before a vowel sound (a university, an hour).","Use the for something specific or already mentioned.","No article for general plural/uncountable ideas (I like music)."],["I am a student. She is an engineer.","I saw a movie. The movie was great."],"'I am student' galat — 'I am a student' bolo.",[
+["___ umbrella is useful in the rain.",["A","An","The"],1,"'umbrella' starts with a vowel sound → an."],
+["She is ___ honest girl.",["a","an","the"],1,"'honest' starts with a vowel sound (silent h) → an."],
+["I saw ___ movie yesterday. ___ movie was great.",["A / The","The / A","A / A"],0,"First mention = a, second mention (specific) = the."],
+["He studies at ___ university in Pune.",["an","a","the"],1,"'university' starts with a /yu/ consonant sound → a."],
+["___ sun rises in the east.",["A","An","The"],2,"Unique things take the."]]),
+T('noun','Basics','Countable & Uncountable Nouns',["Countable nouns use many/few; uncountable nouns use much/little.","Information, advice, furniture, knowledge, news, luggage are uncountable — no -s, no 'a'.","Use 'a piece of' to count them: a piece of advice."],["I need some information. How much water? How many books?"],"'informations', 'advices', 'furnitures' galat hain.",[
+["I need some ___ about the internship.",["informations","information","an information"],1,"Information is uncountable."],
+["How ___ money do you have?",["many","much","few"],1,"Money is uncountable → much."],
+["She gave me a good ___ .",["advices","advice","piece advice"],1,"Advice is uncountable; 'a piece of advice' is also right."],
+["There are too ___ people in the room.",["much","many","little"],1,"People is countable → many."],
+["Which is correct?",["The news are good.","The news is good.","The newses is good."],1,"News is uncountable and singular."]]),
+T('sva','Basics','Subject-Verb Agreement',["Singular subject → verb with -s (he works); plural subject → base verb (they work).","Everyone, each, nobody, somebody and one of the... take singular verbs.","Use 'doesn't' with he/she/it, 'don't' with I/you/we/they."],["Everyone is ready. One of the students has left."],"'He have', 'She don't' galat hain.",[
+["She ___ to college by bus.",["go","goes","going"],1,"She + verb-s."],
+["Everyone ___ excited about the trip.",["are","is","were"],1,"Everyone is singular."],
+["One of my friends ___ a doctor.",["are","is","have"],1,"'One of' → singular verb."],
+["He ___ like spicy food.",["don't","doesn't","not"],1,"He + doesn't."],
+["My brother and I ___ cricket fans.",["is","am","are"],2,"Two subjects joined by 'and' → plural."]]),
+T('pron','Basics','Pronouns (I / me / mine)',["Subject: I, he, she, we, they. Object: me, him, her, us, them.","After prepositions use object pronouns: between you and me.","Possessives: my/mine, your/yours, its (no apostrophe)."],["My friend and I went. This pen is mine."],"Formal mein 'My friend and I' bolo, 'Me and my friend' nahi.",[
+["My friend and ___ went to the interview.",["me","I","myself"],1,"Subject position → I."],
+["Between you and ___, this is a secret.",["I","me","myself"],1,"After 'between' use object pronoun."],
+["This pen is ___ .",["my","mine","me"],1,"'Mine' stands alone as a possessive."],
+["The dog wagged ___ tail.",["it's","its","their"],1,"Possessive 'its' has no apostrophe."],
+["Please send the file to Riya and ___ .",["I","me","my"],1,"Object of 'to' → me."]]),
+T('prep','Basics','Prepositions: in / on / at',["at → exact time/point (at 5 pm, at the door).","on → days, dates, surfaces (on Monday, on 5 May, on the table).","in → months, years, seasons, cities, enclosed spaces (in June, in 2025, in India)."],["I will meet you at 5 pm on Monday in the office."],"'on morning' galat — 'in the morning' sahi.",[
+["The meeting is ___ 10 am.",["on","in","at"],2,"Exact time → at."],
+["I was born ___ 2004.",["in","on","at"],0,"Years → in."],
+["See you ___ Friday.",["at","on","in"],1,"Days → on."],
+["She lives ___ Kolkata.",["at","on","in"],2,"Cities → in."],
+["I study best ___ the morning.",["on","in","at"],1,"in the morning / afternoon / evening."]]),
+T('pres','Tenses','Present Simple vs Continuous',["Present simple: habits and facts (I study daily; water boils at 100°C).","Present continuous: happening now or temporary (I am studying now).","Stative verbs (know, like, want, understand) are not used in continuous."],["She drinks tea every day. She is drinking tea now."],"'I am knowing' galat — 'I know' bolo.",[
+["I ___ English every day.",["am practising","practise","practising"],1,"Daily habit → present simple."],
+["Look! It ___ .",["rains","is raining","rain"],1,"Happening now → present continuous."],
+["I ___ what you mean.",["am understanding","understand","understanding"],1,"'Understand' is stative."],
+["She usually ___ at 6 am.",["is waking up","wakes up","wake up"],1,"Usual habit → present simple."],
+["Please be quiet. I ___ .",["study","am studying","studies"],1,"Right now → continuous."]]),
+T('past','Tenses','Past Simple vs Present Perfect',["Past simple: finished action at a stated time (I visited Delhi in 2022).","Present perfect (have/has + V3): experience or result up to now (I have visited Delhi).","Don't use present perfect with finished-time words: yesterday, last year, ago."],["I have finished my project. I finished it yesterday."],"'I have seen him yesterday' galat.",[
+["I ___ him yesterday.",["have met","met","has met"],1,"'yesterday' needs past simple."],
+["She ___ in Mumbai since 2020.",["lived","has lived","is living"],1,"since + present perfect."],
+["___ you ever ___ a mock interview?",["Did / give","Have / given","Do / give"],1,"Life experience → present perfect."],
+["They ___ the project two days ago.",["have completed","completed","has completed"],1,"'ago' → past simple."],
+["I ___ my homework, so now I'm free.",["finish","have finished","finishing"],1,"Result now → present perfect."]]),
+T('fut','Tenses','Future Forms: will / going to',["will: instant decisions and predictions (I'll help you).","be going to: plans already decided (I'm going to apply tomorrow).","Present continuous: fixed arrangements (I'm meeting HR at 4)."],["Look at the clouds — it is going to rain."],"'I will going' galat.",[
+["The phone is ringing. I ___ it.",["am going to answer","will answer","answer"],1,"Instant decision → will."],
+["I have decided. I ___ learn Python.",["will","am going to","going to"],1,"Already-decided plan → going to."],
+["We ___ the client at 4 pm tomorrow (fixed).",["are meeting","meet","will meeting"],0,"Fixed arrangement → present continuous."],
+["Look at those clouds! It ___ rain.",["will","is going to","is"],1,"Evidence now → going to."],
+["I think India ___ the match.",["will win","wins","is win"],0,"Prediction/opinion → will."]]),
+T('forsince','Tenses','For / Since & Perfect Continuous',["for + period of time (for 3 years); since + starting point (since 2021).","Present perfect continuous: have/has been + V-ing for actions continuing until now.","I have been learning English for two months."],["She has been working here since January."],"'I am working here since 2020' galat — 'I have been working'.",[
+["I have worked here ___ 2022.",["for","since","from"],1,"2022 is a starting point → since."],
+["She has been studying ___ three hours.",["since","for","from"],1,"Period of time → for."],
+["How long ___ you ___ for this internship?",["are / preparing","have / been preparing","did / prepare"],1,"Continuing until now."],
+["He has lived here ___ ten years.",["since","for","from"],1,"Period → for."],
+["We ___ waiting since morning.",["are","have been","were been"],1,"have been waiting."]]),
+T('modal','Sentences','Modal Verbs',["can/could: ability and requests (Could you help me?).","should: advice; must: strong necessity; may/might: possibility.","Modal + base verb: no 'to' and no -s (She can swim)."],["You should revise. It might rain."],"'She can sings' / 'must to go' galat.",[
+["You ___ revise before the interview.",["should","should to","shoulds"],0,"Modal + base verb."],
+["She can ___ well.",["sings","sing","to sing"],1,"After can → base verb."],
+["___ you please send the report? (polite)",["Could","Must","Should"],0,"Could = polite request."],
+["Students ___ wear ID cards (it's a rule).",["must","can","might"],0,"Rule/necessity → must."],
+["It ___ rain later; take an umbrella.",["might","must","shall"],0,"Possibility → might."]]),
+T('cond','Sentences','Conditionals (If sentences)',["First: If + present, will + verb (If I study, I will pass).","Second: If + past, would + verb (If I were you, I would apply).","Third: If + had + V3, would have + V3 (If I had studied, I would have passed)."],["If it rains, we will stay home."],"'If I will study' galat — 'If I study'.",[
+["If it rains, we ___ at home.",["stay","will stay","stayed"],1,"First conditional."],
+["If I ___ you, I would practise daily.",["am","was","were"],2,"'If I were you' is the standard form."],
+["If she ___ harder, she would have passed.",["studied","had studied","would study"],1,"Third conditional: had + V3."],
+["If I ___ rich, I would travel the world.",["am","were","will be"],1,"Unreal present → were."],
+["If you ___ early, you will get a seat.",["come","will come","came"],0,"No 'will' after if."]]),
+T('pass','Sentences','Passive Voice',["Passive = be + V3: The report was written by Ravi.","Use it when the doer is unknown or unimportant.","The tense is shown by 'be': is / was / will be / has been + V3."],["English is spoken worldwide."],"Passive mein hamesha V3 (past participle) lagta hai.",[
+["The email ___ yesterday.",["sent","was sent","is sent"],1,"Past + passive → was sent."],
+["English ___ all over the world.",["speaks","is spoken","is speaking"],1,"Present passive."],
+["The results ___ tomorrow.",["will announce","will be announced","are announce"],1,"will be + V3."],
+["The project has already been ___ .",["complete","completed","completing"],1,"has been + V3."],
+["Passive of 'They built this bridge.'",["This bridge is built.","This bridge was built.","This bridge built."],1,"Past → was built."]]),
+T('rep','Sentences','Reported Speech',["If the reporting verb is past, shift the tense back: am→was, will→would, can→could, do→did.","say something / tell someone: She told me that...","Reported questions keep statement order: He asked where I lived."],["'I am tired,' she said. → She said that she was tired."],"'He asked me where do I live' galat.",[
+["He said, 'I like coding.' → He said he ___ coding.",["likes","liked","will like"],1,"Present → past."],
+["She ___ me that she was late.",["said","told","spoke"],1,"tell + person."],
+["'Where do you live?' → He asked me where I ___ .",["do live","lived","live did"],1,"Statement order + past."],
+["'I will call you.' → She said she ___ call me.",["will","would","can"],1,"will → would."],
+["'We can win.' → They said they ___ win.",["can","could","able"],1,"can → could."]]),
+T('quest','Sentences','Questions & Negatives',["Use do/does/did + base verb for questions and negatives.","Don't use do with be or modals: Are you ready? Can you come?","Order: Wh-word + auxiliary + subject + verb (Where do you live?)."],["Does she work here? She doesn't work here."],"'Did you went?' galat — 'Did you go?'",[
+["___ she like coffee?",["Do","Does","Is"],1,"she → does."],
+["I ___ understand this.",["don't","doesn't","not"],0,"I → don't."],
+["Where ___ you go yesterday?",["did","do","are"],0,"Past question → did."],
+["She didn't ___ the exam.",["passed","pass","passes"],1,"After didn't → base verb."],
+["What ___ your name?",["do","is","does"],1,"Be-verb question."]]),
+T('comp','Sentences','Adjectives & Comparisons',["Short adjectives: -er/-est (taller, tallest); long ones: more/most (more useful).","Never use double comparatives: 'more better' ✗ → better ✓.","Use 'than' to compare: She is smarter than me."],["Today is hotter than yesterday."],"'more better' ya 'more faster' galat.",[
+["This book is ___ than that one.",["more better","better","best"],1,"Good → better (no 'more')."],
+["She is the ___ student in class.",["more intelligent","most intelligent","intelligentest"],1,"Superlative of a long adjective."],
+["He is taller ___ his brother.",["then","than","that"],1,"Comparison → than."],
+["This is ___ useful tool I have used.",["most","the most","more"],1,"Superlative needs 'the'."],
+["Today is ___ than yesterday.",["hotter","more hot","hottest"],0,"hot → hotter."]]),
+T('rel','Sentences','Relative Clauses (who / which / that)',["who → people; which → things; that → both (defining clauses).","whose shows possession (a girl whose father is a doctor).","Don't repeat the pronoun: the man who called me (not 'who he called me')."],["The teacher who taught me is great."],"Relative pronoun ke baad extra 'he/she' mat lagao.",[
+["The teacher ___ taught me is great.",["which","who","whose"],1,"Person → who."],
+["This is the laptop ___ I bought.",["who","which","whom"],1,"Thing → which/that."],
+["I met a girl ___ brother is an actor.",["who","whose","which"],1,"Possession → whose."],
+["The book ___ is on the table is mine.",["who","that","whom"],1,"Thing → that."],
+["People ___ work hard succeed.",["who","which","whose"],0,"People → who."]]),
+T('ger','Sentences','Gerund vs Infinitive',["enjoy, avoid, finish, mind, suggest + V-ing (I enjoy reading).","want, decide, hope, plan, need + to + verb (I want to learn).","After prepositions use V-ing: interested in learning, good at speaking."],["She decided to apply. I look forward to meeting you."],"'I am good in speak' galat — 'good at speaking'.",[
+["I enjoy ___ English.",["to speak","speaking","speak"],1,"enjoy + V-ing."],
+["She decided ___ for the job.",["applying","to apply","apply"],1,"decide + to-infinitive."],
+["He is good at ___ stories.",["tell","to tell","telling"],2,"Preposition + V-ing."],
+["I look forward to ___ you.",["meet","meeting","to meet"],1,"'to' is a preposition here → V-ing."],
+["We need ___ more practice.",["to do","doing","do"],0,"need + to-infinitive."]]),
+T('conn','Sentences','Linking Words',["but/however = contrast; because/since = reason; so/therefore = result.","although/though + clause. Don't use 'although' and 'but' together.","Organise answers with first, then, also, finally."],["Although it rained, we went out."],"'Although... but...' ek saath mat likho.",[
+["___ it was raining, we went out.",["Although","Because","So"],0,"Contrast → although."],
+["I was tired, ___ I finished the work.",["so","but","because"],1,"Contrast → but."],
+["He worked hard, ___ he passed.",["therefore","although","but"],0,"Result → therefore."],
+["Although he is rich, he is humble. (Which is correct?)",["Although he is rich, but he is humble.","Although he is rich, he is humble.","Although he is rich, so he is humble."],1,"Don't use although + but together."],
+["I missed the bus, ___ I was late.",["so","because","although"],0,"Result → so."]]),
+T('indian','Professional','Common Indian-English Mistakes',["'Discuss about' ✗ → discuss; 'return back' ✗ → return.","'Prepone' is not standard — say 'bring forward'. 'Revert back' → reply.","'Passed out' means fainted; say 'graduated'."],["Let's discuss the plan. I graduated in 2025."],"Yeh sab Indian English mein common hain par interview mein avoid karo.",[
+["We will ___ the plan tomorrow.",["discuss about","discuss","discuss on"],1,"'Discuss' needs no preposition."],
+["Please ___ to me by evening.",["revert back","reply","revert again"],1,"'Reply' is standard."],
+["I ___ from college in 2025.",["passed out","graduated","passed away"],1,"'Passed out' = fainted."],
+["She will ___ soon.",["return back","return","returns back"],1,"'Return' already means come back."],
+["Can we ___ the meeting to 3 pm? (earlier)",["prepone","bring forward","preponed"],1,"Standard phrasing."]]),
+T('formal','Professional','Formal & Email English',["Greeting: Dear Sir/Madam or Dear Mr. Rao; closing: Yours sincerely / Regards.","Polite requests: Could you please...? I would be grateful if...","Avoid slang in formal mail: gonna, wanna, plz, asap."],["I would like to apply for the internship."],"Interview/email mein 'wanna', 'gonna' kabhi mat likho.",[
+["Best polite request:",["Send me the file now.","Could you please send me the file?","Give file."],1,"Could you please... is polite."],
+["Formal closing:",["Bye bye","Yours sincerely","Cya"],1,"Formal sign-off."],
+["Choose the formal one:",["I wanna apply for the internship.","I would like to apply for the internship.","I'm gonna apply."],1,"No slang in formal English."],
+["Opening for an unknown recipient:",["Hey guys","Dear Sir/Madam","Yo"],1,"Formal greeting."],
+["I am writing ___ the internship position.",["for about","regarding","on"],1,"'Regarding' is the formal choice."]]),
+T('punct','Professional','Punctuation & Capitals',["Capitalise the start of sentences, the word I, names and places.","Use a comma after introductory words (However, ...) and between list items.","its = belongs to it; it's = it is. Plurals never take an apostrophe."],["It's raining. The company improved its service."],"'i' hamesha capital 'I' hota hai.",[
+["Choose the correct sentence:",["i live in india.","I live in India.","I live in india."],1,"Capitalise I and India."],
+["The company improved ___ service.",["it's","its","its'"],1,"Possessive → its."],
+["Which is correct?",["Its raining today.","It's raining today.","Its' raining today."],1,"It's = it is."],
+["Which is punctuated correctly?",["However I disagree.","However, I disagree.","However; I disagree."],1,"Comma after 'However'."],
+["Two ___ are on the table.",["book's","books","books'"],1,"Plural has no apostrophe."]]),
+T('conf','Professional','Commonly Confused Words',["their (belongs to them) / there (place) / they're (they are).","affect (verb: influence) / effect (noun: result).","your / you're; then (time) / than (comparison)."],["They're going to win. Stress can affect your health."],"Spelling same lagti hai par matlab alag — dhyan se choose karo.",[
+["___ going to win the match.",["Their","There","They're"],2,"They're = they are."],
+["Stress can ___ your health.",["affect","effect","effects"],0,"Verb → affect."],
+["___ is a pen on the table.",["Their","There","They're"],1,"Place/existence → there."],
+["I think ___ right.",["your","you're","yore"],1,"you're = you are."],
+["She is smarter ___ me.",["then","than","that"],1,"Comparison → than."]])
+];
+let G={ai:{}};
+const gBest=k=>S.grammar&&S.grammar[k],gFind=id=>GT.find(t=>t.id===id)||G.ai[id];
+function gOpen(){show('gram');gList()}
+function gList(f=''){G.view='list';
+ const Q=f.trim().toLowerCase(),L=GT.filter(t=>!Q||(t.t+' '+t.c+' '+t.r.join(' ')).toLowerCase().includes(Q)),mb=gBest('mixed');
+ let h=`<div class="card"><h2>📘 Grammar Lab</h2><p class="mut">Pick a topic, learn the rules in 1 minute, then test yourself. Search any topic${AI?' — or let AI teach you something new':''}.</p>
+ <div class="gs"><input id="gq" placeholder="e.g. articles, tenses, passive voice…" value="${esc(f)}" onkeydown="if(event.key==='Enter')gList(this.value)"><button class="p" onclick="gList($('gq').value)">Search</button>${AI?'<button onclick="gAI($(\'gq\').value)">✨ AI lesson</button>':''}</div>
+ <p style="margin:12px 0 0"><button class="p" onclick="gMixed()">🎯 Mixed test (10 questions)${mb?` · best ${mb.best}/${mb.total}`:''}</button> <button onclick="show('home')">← Home</button></p></div>`;
+ [...new Set(L.map(t=>t.c))].forEach(c=>{h+=`<div class="week"><h3>${c}</h3><div class="days">`+L.filter(t=>t.c===c).map(t=>{const b=gBest(t.id);return `<button class="day ${b?'done':''}" data-s="${b?Math.round(b.best/b.total*100)+'%':''}" onclick="gLesson('${t.id}')"><b>${c}</b>${esc(t.t)}</button>`}).join('')+'</div></div>'});
+ if(!L.length)h+=`<div class="card mut">No built-in topic matches "${esc(f)}".${AI?' Tap ✨ AI lesson to generate one.':' Try a different word, e.g. "tense", "article", "passive".'}</div>`;
+ $('gBody').innerHTML=h;scrollTo(0,0)}
+function gLesson(id){
+ const t=gFind(id);G.t=t;G.view='lesson';
+ $('gBody').innerHTML=`<div class="card"><div class="mut">${esc(t.c)}</div><h2 style="font-size:22px">${esc(t.t)}</h2>
+ <h3 class="gh">📌 Rules</h3><ul>${t.r.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+ <h3 class="gh">✍️ Examples</h3><ul>${t.e.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+ ${t.m?`<p class="gtip">⚠️ ${esc(t.m)}</p>`:''}
+ <p style="margin-top:16px"><button class="p" onclick="gQuiz()">📝 Take the test (${t.q.length} questions)</button> <button onclick="gList()">← All topics</button></p></div>`;scrollTo(0,0)}
+function gMixed(){const all=GT.flatMap(t=>t.q);gQuiz(all.sort(()=>Math.random()-.5).slice(0,10),'Mixed test')}
+function gQuiz(qs,title){
+ const t=G.t;qs=qs||t.q;
+ G.run={title:title||t.t,key:title?'mixed':t.id,i:0,s:0,wr:[],qs:qs.map(([q,o,a,w])=>{const op=o.map((x,i)=>({x,c:i===a}));for(let i=op.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[op[i],op[j]]=[op[j],op[i]]}return{q,o:op,w}}).sort(()=>Math.random()-.5)};gQ()}
+function gQ(){
+ const r=G.run,q=r.qs[r.i];G.view='quiz';
+ $('gBody').innerHTML=`<div class="card"><div class="mut">${esc(r.title)} · Question ${r.i+1} of ${r.qs.length} · Score ${r.s}</div>
+ <div class="gbar"><i style="width:${r.i/r.qs.length*100}%"></i></div><h2 style="font-size:19px;margin:14px 0">${esc(q.q)}</h2>
+ ${q.o.map((o,k)=>`<button class="opt" onclick="gAns(${k})">${esc(o.x)}</button>`).join('')}<div id="gFb"></div></div>`;scrollTo(0,0)}
+function gAns(k){
+ const r=G.run,q=r.qs[r.i],ok=q.o[k].c;if(r.done)return;r.done=1;
+ document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(q.o[i].c)b.classList.add('ok');else if(i===k)b.classList.add('no')});
+ if(ok)r.s++;else r.wr.push({q:q.q,a:q.o.find(o=>o.c).x,y:q.o[k].x,w:q.w});
+ $('gFb').innerHTML=`<p class="gtip" style="border-color:var(--${ok?'ok':'bad'})">${ok?'✅ Correct!':'❌ Not quite.'} ${esc(q.w||'')}</p><button class="p" onclick="gNext()">${r.i+1<r.qs.length?'Next →':'See result'}</button>`}
+async function gNext(){const r=G.run;r.done=0;r.i++;if(r.i<r.qs.length)return gQ();
+ G.view='result';const n=r.qs.length,pct=Math.round(r.s/n*100),msg=pct>=90?'Excellent! 🏆':pct>=70?'Good job! 👏':pct>=50?'Getting there — review the rules and retry 💪':'Keep practising — re-read the lesson and try again 📚';
+ $('gBody').innerHTML=`<div class="card"><h2>${esc(r.title)} — Result</h2><div class="big">${r.s}<span class="mut">/${n}</span> <span style="font-size:22px">${pct}%</span></div><p>${msg}</p>
+ ${r.wr.length?`<h3 class="gh">🔍 Review your mistakes</h3>`+r.wr.map(x=>`<div class="fb" style="max-width:100%;margin:8px 0"><div>${esc(x.q)}</div><div>You: <s>${esc(x.y)}</s> → <ins>${esc(x.a)}</ins></div><i>${esc(x.w||'')}</i></div>`).join(''):'<p>🎉 Perfect score — no mistakes!</p>'}
+ <p style="margin-top:14px">${r.key!=='mixed'&&G.t?'<button onclick="gLesson(G.t.id)">📖 Lesson</button> ':''}<button class="p" onclick="${r.key==='mixed'?'gMixed()':'gQuiz()'}">🔁 Try again</button> <button onclick="gList()">← Topics</button></p></div>`;
+ try{S.grammar=(await srv('/api/grammar',{topic:r.key,title:r.title,correct:r.s,total:n})).grammar}catch(e){}}
+async function gAI(topic){
+ topic=topic.trim().slice(0,60);if(topic.length<3)return alert('Type a grammar topic first, e.g. "present perfect".');
+ $('gBody').innerHTML='<div class="card">✨ AI is preparing your lesson and test…</div>';
+ try{const o=await api(`You are an English grammar teacher for an Indian learner. Reply ONLY JSON: {"title":"","rules":["3-4 short rules"],"examples":["3 examples"],"tip":"one common mistake, Hinglish ok","questions":[{"q":"fill-in or choose-correct question","options":["a","b","c"],"answer":0,"why":"short reason"}]} with exactly 6 questions, 3 options each, answer = index of the correct option. Be accurate.`,[{role:'user',content:'Grammar topic: '+topic}],1500);
+  const qs=(o.questions||[]).filter(q=>q.q&&Array.isArray(q.options)&&q.options.length>=2&&Number.isInteger(q.answer)&&q.answer<q.options.length).slice(0,8).map(q=>[String(q.q),q.options.map(String),q.answer,String(q.why||'')]);
+  if(!o.title||!qs.length||!o.rules)throw new Error('bad');
+  const id='ai:'+String(o.title).slice(0,50);G.ai[id]=T(id,'AI lesson',String(o.title),o.rules.map(String),(o.examples||[]).map(String),String(o.tip||''),qs);gLesson(id)
+ }catch(e){$('gBody').innerHTML=`<div class="card">Could not generate this lesson (${esc(e.message)}). <button onclick="gList()">← Back</button></div>`}}
+(async()=>{
+ try{const r=await fetch('/api/ping');LOCAL=!(r.ok&&(await r.json()).ok)}catch(e){LOCAL=true}
+ if(LOCAL)$('lhint').insertAdjacentHTML('afterend','<p class="sub" style="font-size:12px;opacity:.85;margin-top:-14px">Demo mode: OTP is auto-filled and progress is saved in this browser.</p>');
+ const v=location.hash.match(/^#verify=(ASC-[0-9A-F]{8})$/i);
+ if(v){try{const j=await srv('/api/verify/'+v[1]);drawCert(j.cert);$('certPage').insertAdjacentHTML('afterbegin','<p style="color:#16a34a;font-weight:700">✅ Verified — this certificate is genuine.</p>');document.querySelector('#cert .np button.p').insertAdjacentHTML('afterend',' ');$('cert').querySelector('.np button:not(.p)').onclick=()=>{location.hash='';location.reload()}}catch(e){show('login');$('lerr').textContent='Certificate not found.'}return}
+ if(TOK){try{boot(await srv('/api/me'));return}catch(e){TOK='';try{localStorage.removeItem('asc_tok')}catch(x){}}}
+ show('login')})();
+</script></body></html>

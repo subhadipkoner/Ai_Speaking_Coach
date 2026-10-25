@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AI Speaking Coach</title>
+  <meta name="description" content="Practice spoken English for placements and interviews with an AI coach." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>  <!-- ============ SCREEN 1: SETUP ============ -->
+  <main id="screen-setup" class="screen setup">
+    <header class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-6l-4 4v-4a3 3 0 0 1-3-3z"/></svg>
+      </span>
+      <span>AI Speaking Coach</span>
+    </header>
+
+    <section class="hero">
+      <h1>Speak with confidence before the interview does.</h1>
+      <p>Practise real placement conversations by talking or typing. Get gentle corrections as you go and an honest score at the end.</p>
+    </section>
+
+    <section class="setup-card" aria-labelledby="scenario-label">
+      <h2 id="scenario-label" class="step-label"><span>1</span> Choose a scenario</h2>
+      <div class="scenarios" role="radiogroup" aria-labelledby="scenario-label">
+        <button class="scenario" role="radio" aria-checked="true" data-scenario="casual">
+          <strong>Casual chat</strong><small>Warm up with everyday topics</small>
+        </button>
+        <button class="scenario" role="radio" aria-checked="false" data-scenario="hr">
+          <strong>HR interview</strong><small>Strengths, goals, tough questions</small>
+        </button>
+        <button class="scenario" role="radio" aria-checked="false" data-scenario="intro">
+          <strong>Self-introduction</strong><small>Perfect "Tell me about yourself"</small>
+        </button>
+        <button class="scenario" role="radio" aria-checked="false" data-scenario="gd">
+          <strong>Group discussion</strong><small>Argue, agree, build on points</small>
+        </button>
+      </div>
+
+      <h2 id="mode-label" class="step-label"><span>2</span> How do you want to practise?</h2>
+      <div class="segmented" role="radiogroup" aria-labelledby="mode-label" data-mode-toggle>
+        <button role="radio" aria-checked="false" data-mode="voice">🎙 Voice</button>
+        <button role="radio" aria-checked="true" data-mode="text">⌨ Text</button>
+      </div>
+      <p class="voice-note" data-voice-unsupported hidden>Voice needs a browser with speech recognition (Chrome, Edge or Safari). Text mode works everywhere.</p>
+
+      <button id="start-btn" class="btn-primary btn-large">Start practice</button>
+    </section>
+
+    <footer class="foot">Your conversation is sent to the AI only to generate replies and is not stored.</footer>
+  </main>
+
+  <!-- ============ SCREEN 2: CHAT ============ -->
+  <main id="screen-chat" class="screen chat" hidden>
+    <header class="chat-top">
+      <div class="chat-title">
+        <span class="dot" aria-hidden="true"></span>
+        <div>
+          <strong id="chat-scenario">Casual chat</strong>
+          <small id="chat-turns">Coach is joining…</small>
+        </div>
+      </div>
+      <div class="chat-actions">
+        <div class="segmented small" role="radiogroup" aria-label="Input mode" data-mode-toggle>
+          <button role="radio" aria-checked="false" data-mode="voice">Voice</button>
+          <button role="radio" aria-checked="true" data-mode="text">Text</button>
+        </div>
+        <button id="end-btn" class="btn-end" disabled>End &amp; score</button>
+      </div>
+    </header>
+
+    <div id="messages" class="messages" aria-live="polite"></div>
+
+    <footer class="composer">
+      <p id="error-bar" class="error-bar" role="alert" hidden></p>
+
+      <!-- Text composer -->
+      <form id="text-form" class="text-form">
+        <label for="text-input" class="sr-only">Your answer</label>
+        <textarea id="text-input" rows="1" maxlength="2000" placeholder="Type your answer…" autocomplete="off"></textarea>
+        <button type="submit" id="send-btn" class="btn-send" aria-label="Send">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg>
+        </button>
+      </form>
+
+      <!-- Voice composer -->
+      <div id="voice-panel" class="voice-panel" hidden>
+        <p id="live-transcript" class="live-transcript" aria-live="polite"></p>
+        <div class="voice-row">
+          <select id="accent" class="accent" aria-label="Your accent (helps recognition)">
+            <option value="en-IN">English (India)</option>
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+          </select>
+          <button id="mic-btn" class="mic" data-state="idle" aria-label="Start speaking">
+            <span class="mic-ring" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <span class="mic-spacer" aria-hidden="true"></span>
+        </div>
+        <p id="mic-status" class="mic-status">Tap the mic and answer out loud</p>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ============ SCREEN 3: SCORE ============ -->
+  <main id="screen-score" class="screen score" hidden>
+    <div id="score-loading" class="score-loading">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Reviewing your whole conversation…</p>
+    </div>
+
+    <article id="score-card" class="score-card" hidden>
+      <header class="score-head">
+        <div class="ring" id="score-ring">
+          <div class="ring-inner">
+            <span id="score-value">0</span><small>/ 100</small>
+          </div>
+        </div>
+        <div>
+          <p class="eyebrow" id="score-scenario">Session score</p>
+          <h1 id="score-grade">Good effort</h1>
+          <p id="score-summary" class="score-summary"></p>
+        </div>
+      </header>
+
+      <section class="breakdown" aria-label="Score breakdown">
+        <div class="bar" data-key="grammar"><span>Grammar</span><div class="track"><i></i></div><b>0/25</b></div>
+        <div class="bar" data-key="vocabulary"><span>Vocabulary</span><div class="track"><i></i></div><b>0/25</b></div>
+        <div class="bar" data-key="fluency"><span>Fluency</span><div class="track"><i></i></div><b>0/25</b></div>
+        <div class="bar" data-key="confidence"><span>Confidence &amp; clarity</span><div class="track"><i></i></div><b>0/25</b></div>
+      </section>
+
+      <div class="lists">
+        <section>
+          <h2 class="good">What you did well</h2>
+          <ul id="strengths"></ul>
+        </section>
+        <section>
+          <h2 class="work">Work on next</h2>
+          <ul id="improvements"></ul>
+        </section>
+      </div>
+
+      <section>
+        <h2>Say it better</h2>
+        <div id="better-sentences" class="better"></div>
+      </section>
+
+      <button id="again-btn" class="btn-primary btn-large">Practice again</button>
+    </article>
+
+    <div id="score-error" class="score-error" hidden>
+      <p id="score-error-text"></p>
+      <div class="row">
+        <button id="retry-score-btn" class="btn-primary">Try again</button>
+        <button id="back-chat-btn" class="btn-ghost">Back to conversation</button>
+      </div>
+    </div>
+  </main>
+
+  <template id="tpl-msg">
+    <div class="msg"><div class="bubble"></div></div>
+  </template>
+
+  <script src="speech.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+name: Gemini CLI
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened]
+
+jobs:
+  gemini:
+    # Only the repo owner/collaborators can trigger it, and only with @gemini-cli
+    if: |
+      (github.event_name == 'issue_comment' &&
+        contains(github.event.comment.body, '@gemini-cli') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'issues' &&
+        contains(github.event.issue.body, '@gemini-cli') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Gemini CLI
+        id: gemini
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: gemini-3.8-flash
+          prompt: |
+            You are helping on the repository ${{ github.repository }}.
+            Request (from the issue or comment that mentioned @gemini-cli):
+            ${{ github.event.comment.body || github.event.issue.body }}
+            Answer helpfully and concisely.
+
+      - name: Post reply
+        if: steps.gemini.outputs.summary != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPLY: ${{ steps.gemini.outputs.summary }}
+          NUMBER: ${{ github.event.issue.number }}
+        run: gh issue comment "$NUMBER" --repo "${{ github.repository }}" --body "$REPLY"
